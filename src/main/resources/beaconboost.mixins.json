@@ -1,0 +1,20 @@
+{
+	"required": true,
+	"package": "org.autismoschosen.mc.btwo.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"BeaconBlockEntityDataMixin",
+		"BeaconBlockEntityBaseMixin",
+		"BeaconBlockEntityEffectMixin",
+		"BeaconBlockEntityLifecycleMixin",
+		"MinecraftServerBeaconTickMixin",
+		"BeaconBlockEntityVanillaActiveMixin",
+		"BeaconBlockEntityAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

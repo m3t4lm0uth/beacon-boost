@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this mod, please cite it using the metadata from this file."
+title: Beacon Boost
+type: software
+authors:
+  - given-names: m3t4lm0uth
+repository-code: 
+version: 1.0.0
+date-released: '2026-02-22'
+
+
+references:
+  - type: software
+    title: "Increased Range Beacons"
+    authors:
+      - given-names: brisai
+    repository-code: "https://www.planetminecraft.com/data-pack/increased-range-beacons-multiplayer-compatible/"
+    notes: "Mechanics inspiration for extended beacon range."
