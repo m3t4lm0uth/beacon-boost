@@ -1,6 +1,6 @@
 # BeaconBoost
 
-**BeaconBoost** is a Fabric mod that extends vanilla beacon range based on the materials used in the beacon base.
+**BeaconBoost** is a Fabric mod that extends vanilla beacon range depending on the materials used in the beacon base.
 
 ## Features
 
