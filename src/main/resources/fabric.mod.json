@@ -3,7 +3,7 @@
 	"id": "beaconboost",
 	"version": "${version}",
 	"name": "BeaconBoost",
-	"description": "Beacon Booster Pack!",
+	"description": "A Minecraft 1.21.11 mod that boosts beacon range based on the overall composition of the beacon base.",
 	"authors": [
 		"metalmouth"
 	],
