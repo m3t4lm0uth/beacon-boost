@@ -8,10 +8,11 @@
 		"metalmouth"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://modrinth.com/mod/beacon-boost",
+		"sources": "https://github.com/m3t4lm0uth/beacon-boost",
+		"issues": "https://github.com/m3t4lm0uth/beacon-boost/issues"
 	},
-	"license": "CC0-1.0",
+	"license": "GPL-3.0-only",
 	"icon": "assets/beaconboost/icon.png",
 	"environment": "*",
 	"entrypoints": {
