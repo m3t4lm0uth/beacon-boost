@@ -3,7 +3,6 @@
 ### changed
 - updated pack icon.
 - updated contact info to match Modrinth.
-
 ## [1.21.11_v1.0.0] - 2026-02-17
 ### added
 - added support for minecraft 1.21.11.
