@@ -1,0 +1,68 @@
+name: update-pages
+
+on:
+  workflow_dispatch:  # manual trigger from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update-jar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: build with Gradle
+        run: ./gradlew build
+
+      - name: copy jar into docs and extract version
+        id: jar
+        run: |
+          mkdir -p docs
+
+          # get newest jar
+          LATEST_JAR=$(ls -t build/libs/BeaconBoost-*.jar | head -n 1)
+          BASENAME=$(basename "$LATEST_JAR")
+
+          cp "$LATEST_JAR" "docs/$BASENAME"
+          cp "$LATEST_JAR" docs/BeaconBoost-latest.jar
+
+          # get version number
+          # pattern: BeaconBoost-<mc-version>-<mod-version>.jar
+          if [[ "$BASENAME" =~ ^BeaconBoost-[^-]+-(.+)\.jar$ ]]; then
+            VERSION="${BASENAME#BeaconBoost-}"
+            VERSION="${VERSION#*-}"   # strip mc version + dash
+            VERSION="${VERSION%.jar}" # strip .jar
+          else
+            VERSION="unknown"
+          fi
+
+          echo "BASENAME=$BASENAME" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: update version in docs/index.html
+        run: |
+          sed -i "s/__VERSION__/${{ steps.jar.outputs.VERSION }}/g" docs/index.html
+
+      - name: commit and push updated jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/BeaconBoost-latest.jar docs/index.html
+          git commit -m "Update website jar to ${{ steps.jar.outputs.VERSION }}" || echo "No changes to commit"
+          git push
