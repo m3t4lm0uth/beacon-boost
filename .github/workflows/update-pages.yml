@@ -34,7 +34,7 @@ jobs:
           mkdir -p docs
 
           # get newest jar
-          LATEST_JAR=$(ls -t build/libs/BeaconBoost-*.jar | head -n 1)
+          LATEST_JAR=$(ls -t build/libs/beaconboost-*.jar | head -n 1)
           BASENAME=$(basename "$LATEST_JAR")
 
           cp "$LATEST_JAR" "docs/$BASENAME"
