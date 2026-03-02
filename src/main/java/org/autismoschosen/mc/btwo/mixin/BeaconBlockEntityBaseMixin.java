@@ -7,6 +7,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.server.world.ServerWorld;
 import org.autismoschosen.mc.btwo.ExtendedBeaconData;
+import org.autismoschosen.mc.btwo.BeaconBoostConfig;
+import org.autismoschosen.mc.btwo.ConfigManager;
 import org.autismoschosen.mc.btwo.BeaconDataCache;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityBaseMixin {
 
-	 // After vanilla updates its level / beam / base info, compute extended range.
+	// After vanilla updates its level / beam / base info, compute extended range.
 
 	@Inject(method = "updateLevel(Lnet/minecraft/world/World;III)I", at = @At("TAIL"))
 	private static void beaconboost$afterUpdateLevel(World world, int x, int y, int z,
@@ -42,7 +44,7 @@ public abstract class BeaconBlockEntityBaseMixin {
 
 		int levels = beaconboost$estimateLevels(counts);
 		int range = beaconboost$computeRange(counts, levels);
-		
+
 		ext.beaconboost$setExtendedRange(range);
 	}
 
@@ -77,18 +79,22 @@ public abstract class BeaconBlockEntityBaseMixin {
 
 	// group-of-two math + clamp at 500
 	private static int beaconboost$computeRange(int[] c, int levels) {
+		BeaconBoostConfig cfg = ConfigManager.CONFIG;
+
 		int iron = c[0];
 		int gold = c[1];
 		int emerald = c[2];
 		int diamond = c[3];
 		int netherite = c[4];
 
-		// groups of 2
-		int groupsIron = iron / 2;
-		int groupsGold = gold / 2;
-		int groupsEmerald = emerald / 2;
-		int groupsDiamond = diamond / 2;
-		int groupsNetherite = netherite / 2;
+		int groupSize = Math.max(cfg.groupSize, 1);
+
+		// groups of groupSize
+		int groupsIron = iron / groupSize;
+		int groupsGold = gold / groupSize;
+		int groupsEmerald = emerald / groupSize;
+		int groupsDiamond = diamond / groupSize;
+		int groupsNetherite = netherite / groupSize;
 
 		// 1. start from vanilla radius, based on level: 1→20, 2→30, 3→40, 4→50
 		int range = 0;
@@ -96,15 +102,15 @@ public abstract class BeaconBlockEntityBaseMixin {
 			range = levels * 10 + 10;
 
 		// 2. add your weighted groups
-		range += groupsIron * 0;
-		range += groupsGold * 1;
-		range += groupsEmerald * 2;
-		range += groupsDiamond * 4;
-		range += groupsNetherite * 6;
+		range += groupsIron * cfg.weightIron;
+		range += groupsGold * cfg.weightGold;
+		range += groupsEmerald * cfg.weightEmerald;
+		range += groupsDiamond * cfg.weightDiamond;
+		range += groupsNetherite * cfg.weightNetherite;
 
-		// 3. clamp at 500
-		if (range > 500) {
-			range = 500;
+		// 3. clamp at cfg.maxRange
+		if (range > cfg.maxRange) {
+			range = cfg.maxRange;
 		}
 
 		return range;

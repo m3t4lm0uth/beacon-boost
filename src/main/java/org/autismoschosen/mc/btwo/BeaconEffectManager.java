@@ -11,96 +11,114 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.autismoschosen.mc.btwo.mixin.BeaconBlockEntityAccessor;
+import org.autismoschosen.mc.btwo.ConfigManager;
+import org.autismoschosen.mc.btwo.BeaconBoostConfig;
 
 public class BeaconEffectManager {
 
-    public static void tick(MinecraftServer server) {
-        for (ServerWorld world : server.getWorlds()) {
-            for (PlayerEntity player : world.getPlayers()) {
-                applyBeaconsToPlayer(world, player);
-            }
-        }
-    }
+	public static void tick(MinecraftServer server) {
+		for (ServerWorld world : server.getWorlds()) {
+			for (PlayerEntity player : world.getPlayers()) {
+				applyBeaconsToPlayer(world, player);
+			}
+		}
+	}
 
-    private static void applyBeaconsToPlayer(ServerWorld world, PlayerEntity player) {
-        Vec3d playerPos = new Vec3d(player.getX(), player.getY(), player.getZ());
+	private static void applyBeaconsToPlayer(ServerWorld world, PlayerEntity player) {
+		BeaconBoostConfig cfg = ConfigManager.CONFIG;
 
-        for (BeaconRegistry.BeaconKey key : BeaconRegistry.getBeacons()) {
-            if (key.world != world)
-                continue;
+		Vec3d playerPos = new Vec3d(player.getX(), player.getY(), player.getZ());
 
-            BlockPos beaconPos = key.pos;
+		for (BeaconRegistry.BeaconKey key : BeaconRegistry.getBeacons()) {
+			if (key.world != world)
+				continue;
 
-            BeaconBlockEntity beacon = null;
-            BeaconDataCache.BeaconSnapshot snap = BeaconDataCache.getSnapshot(world, beaconPos);
-            if (snap == null) {
-                continue;
-            }
+			BlockPos beaconPos = key.pos;
 
-            boolean chunkLoaded = world.isChunkLoaded(beaconPos);
-            boolean vanillaActiveNow = false;
+			BeaconBlockEntity beacon = null;
+			BeaconDataCache.BeaconSnapshot snap = BeaconDataCache.getSnapshot(world, beaconPos);
+			if (snap == null) {
+				continue;
+			}
 
-            if (chunkLoaded) {
-                BlockEntity be = world.getBlockEntity(beaconPos);
-                if (be instanceof BeaconBlockEntity b) {
-                    beacon = b;
-                    if (b instanceof ExtendedBeaconData extLoaded) {
-                        vanillaActiveNow = extLoaded.beaconboost$isVanillaActive();
-                    }
-                }
-            } else {
-                // When unloaded, fall back to last known vanilla-active snapshot
-                vanillaActiveNow = snap.active;
-            }
+			boolean chunkLoaded = world.isChunkLoaded(beaconPos);
+			boolean vanillaActiveNow = false;
 
-            int beaconLevel = snap.levels;
-            if (!vanillaActiveNow || beaconLevel <= 0) {
-                continue;
-            }
+			if (chunkLoaded) {
+				BlockEntity be = world.getBlockEntity(beaconPos);
+				if (be instanceof BeaconBlockEntity b) {
+					beacon = b;
+					if (b instanceof ExtendedBeaconData extLoaded) {
+						vanillaActiveNow = extLoaded.beaconboost$isVanillaActive();
+					}
+				}
+			} else {
+				if (!cfg.allowUnloadedChunks) {
+					// skip effects entirely if config disallows unloaded chunks
+					continue;
+				}
+				// when unloaded and allowed by config, fall back to last active vanilla
+				// snapshot
+				vanillaActiveNow = snap.active;
+			}
 
-            int range = snap.extendedRange;
-            if (range <= 0) {
-                continue;
-            }
+			int beaconLevel = snap.levels;
+			if (!vanillaActiveNow || beaconLevel <= 0) {
+				continue;
+			}
 
-            double dx = playerPos.x - (beaconPos.getX() + 0.5);
-            double dz = playerPos.z - (beaconPos.getZ() + 0.5);
-            double distSq = dx * dx + dz * dz;
-            if (distSq > (double) range * (double) range) {
-                continue;
-            }
+			int range = snap.extendedRange;
+			if (range <= 0) {
+				continue;
+			}
+			// horizontal range check
+			double dx = playerPos.x - (beaconPos.getX() + 0.5);
+			double dz = playerPos.z - (beaconPos.getZ() + 0.5);
+			double distSq = dx * dx + dz * dz;
+			if (distSq > (double) range * (double) range) {
+				continue;
+			}
 
-            RegistryEntry<StatusEffect> primary;
-            RegistryEntry<StatusEffect> secondary;
+			// vanilla-style vertical range if enabled
+			// - upward: unlimited
+			// - downward: limited by range
+			if (!cfg.infiniteVertical) {
+				double dy = playerPos.y - (beaconPos.getY() + 0.5);
+				if (dy < 0 && Math.abs(dy) > range) {
+					continue;
+				}
+			}
 
-            if (beacon != null) {
-                BeaconBlockEntityAccessor accessor = (BeaconBlockEntityAccessor) beacon;
-                primary = accessor.beaconboost$getPrimary();
-                secondary = accessor.beaconboost$getSecondary();
-            } else {
-                primary = snap.getPrimaryEntry();
-                secondary = snap.getSecondaryEntry();
-            }
+			RegistryEntry<StatusEffect> primary;
+			RegistryEntry<StatusEffect> secondary;
 
-            if (primary == null && secondary == null) {
-                continue;
-            }
+			if (beacon != null) {
+				BeaconBlockEntityAccessor accessor = (BeaconBlockEntityAccessor) beacon;
+				primary = accessor.beaconboost$getPrimary();
+				secondary = accessor.beaconboost$getSecondary();
+			} else {
+				primary = snap.getPrimaryEntry();
+				secondary = snap.getSecondaryEntry();
+			}
 
-            int duration = (9 + beaconLevel * 2) * 20;
-            int amplifier = 0;
-            if (beaconLevel >= 4 && primary != null && primary == secondary) {
-                amplifier = 1;
-            }
+			if (primary == null && secondary == null) {
+				continue;
+			}
 
-            if (primary != null) {
-                player.addStatusEffect(
-                        new StatusEffectInstance(primary, duration, amplifier, true, true));
-            }
+			int duration = (9 + beaconLevel * 2) * 20;
+			int amplifier = 0;
+			if (beaconLevel >= 4 && primary != null && primary == secondary) {
+				amplifier = 1;
+			}
 
-            if (beaconLevel >= 4 && secondary != null && secondary != primary) {
-                player.addStatusEffect(new StatusEffectInstance(secondary, duration, 0, true, true));
-            }
-        }
-    }
+			if (primary != null) {
+				player.addStatusEffect(
+						new StatusEffectInstance(primary, duration, amplifier, true, true));
+			}
+
+			if (beaconLevel >= 4 && secondary != null && secondary != primary) {
+				player.addStatusEffect(new StatusEffectInstance(secondary, duration, 0, true, true));
+			}
+		}
+	}
 }
-
