@@ -1,4 +1,7 @@
 # changelog
+## [1.21.11_v1.0.2] - 2026-03-02
+### added
+- added support for user configuration of default values.
 ## [1.21.11_v1.0.1] - 2026-02-28
 ### changed
 - updated pack icon.
