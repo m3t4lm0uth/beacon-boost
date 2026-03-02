@@ -11,8 +11,8 @@ BeaconBoost increases beacon range by counting base blocks in groups and applyin
 - +0 blocks of range per group of iron blocks  
 - +1 block of range per group of gold blocks  
 - +2 blocks of range per group of emerald blocks  
-- +6 blocks of range per group of diamond blocks  
-- +8 blocks of range per group of netherite blocks  
+- +4 blocks of range per group of diamond blocks  
+- +6 blocks of range per group of netherite blocks  
 
 - Group size: 2 blocks  
 
