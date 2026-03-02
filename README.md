@@ -1,6 +1,6 @@
 # Beacon Boost
 
-**Beacon Boost** is a Fabric mod that extends vanilla beacon range depending on the materials used in the beacon base.
+**Beacon Boost** is a Fabric mod that extends vanilla beacon range depending on the materials used in the beacon base. It is capable of being ran server-side only, as well as in singleplayer.
 
 ## Features
 
@@ -19,6 +19,8 @@ BeaconBoost increases beacon range by counting base blocks in groups and applyin
 - Absolute maximum horizontal range: 500 blocks (radius)  
 
 - The default beacon range now extends infinitely downward as well as upward.
+
+- These settings are now configurable in the mods config file.
 
 ## Additional notes
 
