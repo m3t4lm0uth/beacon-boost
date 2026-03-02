@@ -38,12 +38,12 @@ jobs:
           BASENAME=$(basename "$LATEST_JAR")
 
           cp "$LATEST_JAR" "docs/$BASENAME"
-          cp "$LATEST_JAR" docs/BeaconBoost-latest.jar
+          cp "$LATEST_JAR" docs/beaconboost-latest.jar
 
           # get version number
-          # pattern: BeaconBoost-<mc-version>-<mod-version>.jar
-          if [[ "$BASENAME" =~ ^BeaconBoost-[^-]+-(.+)\.jar$ ]]; then
-            VERSION="${BASENAME#BeaconBoost-}"
+          # pattern: beaconboost-<mc-version>-<mod-version>.jar
+          if [[ "$BASENAME" =~ ^beaconboost-[^-]+-(.+)\.jar$ ]]; then
+            VERSION="${BASENAME#beaconboost-}"
             VERSION="${VERSION#*-}"   # strip mc version + dash
             VERSION="${VERSION%.jar}" # strip .jar
           else
@@ -63,6 +63,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/BeaconBoost-latest.jar docs/index.html
+          git add docs/beaconboost-latest.jar docs/index.html
           git commit -m "Update website jar to ${{ steps.jar.outputs.VERSION }}" || echo "No changes to commit"
           git push
