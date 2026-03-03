@@ -40,12 +40,8 @@ jobs:
           cp "$LATEST_JAR" "docs/$BASENAME"
           cp "$LATEST_JAR" docs/beaconboost-latest.jar
 
-          # get version number
-          # pattern: beaconboost-<mc-version>-<mod-version>.jar
-          if [[ "$BASENAME" =~ ^beaconboost-[^-]+-(.+)\.jar$ ]]; then
-            VERSION="${BASENAME#beaconboost-}"
-            VERSION="${VERSION#*-}"   # strip mc version + dash
-            VERSION="${VERSION%.jar}" # strip .jar
+          if [[ "$BASENAME" =~ ^beaconboost-([0-9.]+)\.jar$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
           else
             VERSION="unknown"
           fi
